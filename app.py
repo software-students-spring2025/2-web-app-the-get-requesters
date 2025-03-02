@@ -125,12 +125,33 @@ def create_event():
         
         except Exception as e:
             flash(f"Error: {str(e)}", "danger")
-            return redirect(url_for('create_event')) 
+            return redirect(url_for('create_event'))
     return render_template("create_event.html")
 
 @app.route('/event/<event_id>')
 @login_required
 def your_event_details(event_id):
+    event_id = "test"
+    """
+    Test data
+
+    event = {
+        "event_id": "test",
+        "creator": "lana",
+        "date": 1740897357,
+        "invitees": ["andrew", "samantha", "lana", "jack"]
+    }
+    comments = [
+        {
+            "user": "andrew",
+            "text": "nice!"
+        },
+        {
+            "user": "lana",
+            "text": "thanks!"
+        }
+    ]
+    """
     event = db.events.find_one({"_id": ObjectId(event_id)})
 
     if not event or event["creator"] != current_user.username:
