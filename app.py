@@ -5,6 +5,7 @@ import pymongo
 import os
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
+from datetime import datetime
 
 load_dotenv()
 
@@ -17,6 +18,7 @@ connection = pymongo.MongoClient(os.getenv("MONGODB_URI"))
 db = connection[os.getenv("DB_NAME")]
 users_collection = db["users"]
 groups_collection = db["groups"]
+events_collection = db["events"]
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
@@ -99,8 +101,12 @@ def register():
 @login_required
 def home():
     username = current_user.username
-    created_events = list(db.events.find({"creator": username}))
-    joined_events = list(db.events.find({"attending": username, "creator": {"$ne": username}}))
+    created_events = list(events_collection.find({"creator": username}))
+    joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
+
+    for event in created_events + joined_events:
+        if isinstance(event["event_date"], datetime):
+            event["event_date"] = event["event_date"].strftime('%B %d, %Y')
 
     return render_template("home.html", created_events=created_events, joined_events=joined_events)
 
@@ -115,13 +121,58 @@ def logout():
 def create_group():
     if request.method == 'POST':
         group_name = request.form['group_name']
-        members = []
-        member = request.form['member_name']
-        members.append(member)
-        new_group = groups_collection.insert_one({'owner_id': current_user.get_id(), 'group_name': group_name, 'members': members})
-        return redirect(url_for('groups'))
+        members = [member.strip() for member in request.form['members'].split(',') if member.strip()]
+        members = list(set(members))
+
+        existing_group = groups_collection.find_one({"group_name": group_name})
+        if existing_group:
+            flash(f"This group already exists", "warning")
+            return redirect(url_for('create_group'))
+
+        valid_users = {user["username"] for user in users_collection.find({"username": {"$in": members}})}
+        invalid_users = set(members) - valid_users
+        members = list(valid_users)
+        if invalid_users:
+            flash(f"The following users were not found: {', '.join(invalid_users)}", "warning")
+            return redirect(url_for('create_group'))
+
+        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': list(members)})
+        return redirect(url_for('profile'))
         
     return render_template("create_group.html")
+
+@app.route('/create_event', methods=['GET', 'POST'])
+@login_required
+def create_event():
+    if request.method == 'POST':
+        event_name = request.form['event_name']
+        event_date = request.form['event_date']
+        description = request.form['description']
+        group = request.form['group_name']
+
+        try:
+            event_date = datetime.strptime(event_date, "%Y-%m-%d")
+        except ValueError:
+            flash("Invalid date format!", "danger")
+            return redirect(url_for('create_event'))
+        
+        group = groups_collection.find_one({"group_name": group})
+        if not group:
+            flash("Group Not Found", "warning")
+            return redirect(url_for("create_event"))
+        attending = group["members"]
+
+        new_event = events_collection.insert_one({
+                                                'creator': current_user.username,
+                                                'event_name': event_name,
+                                                'description': description,
+                                                'event_date': event_date,
+                                                'attending': list(attending),
+                                                'group_name': group["group_name"]
+                                                })
+        return redirect(url_for('home'))
+        
+    return render_template("create_event.html")
 
 @app.route('/groups')
 @login_required
@@ -133,8 +184,8 @@ def groups():
 @login_required
 def profile():
     username = current_user.username
-    created_groups = list(db.groups.find({"owner": username}))
-    joined_groups = list(db.groups.find({"members": username, "owner": {"$ne": username}}))
+    created_groups = list(groups_collection.find({"owner": username}))
+    joined_groups = list(groups_collection.find({"members": username, "owner": {"$ne": username}}))
 
     return render_template("profile.html", created_groups=created_groups, joined_groups=joined_groups)
 

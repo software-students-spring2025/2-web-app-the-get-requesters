@@ -7,9 +7,9 @@
     <h2>Your Groups</h2>
     {% if created_groups %}
         <ul>
-            {% for event in created_events %}
+            {% for group in created_groups %}
                 <li>
-                    <strong>{{ event.event_name }}</strong>
+                    <strong>{{ group.group_name }}</strong>
                     <br>Members:
                     <ul>
                         {% for member in group.members %}

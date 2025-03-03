@@ -4,16 +4,19 @@
     <h1>Welcome, {{ current_user.username }}!</h1>
     <a href="{{ url_for('logout') }}">Logout</a>
     <a href="{{ url_for('profile') }}">Profile</a>
+    <a href="{{ url_for('create_event') }}">New Event</a>
     <a href="{{ url_for('create_group') }}">New Group</a>
 
     <h2>Your Created Events</h2>
     {% if created_events %}
         <ul>
             {% for event in created_events %}
-                <li>
-                    <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.date }})
-                </li>
-            {% endfor %}
+            <li>
+                <strong>{{ event.event_name }}</strong> - 
+                {{ event.description }} 
+                <br>Date: {{ event.event_date }}
+            </li>
+        {% endfor %}        
         </ul>
     {% else %}
         <p>You haven't created any events yet.</p>
@@ -23,10 +26,12 @@
     {% if joined_events %}
         <ul>
             {% for event in joined_events %}
-                <li>
-                    <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.date }})
-                </li>
-            {% endfor %}
+            <li>
+                <strong>{{ event.event_name }}</strong> - 
+                {{ event.description }} 
+                <br>Date: {{ event.event_date }}
+            </li>
+        {% endfor %}        
         </ul>
     {% else %}
         <p>You haven't joined any events yet.</p>
