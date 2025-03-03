@@ -107,7 +107,8 @@ def home():
     joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
 
     for event in created_events + joined_events:
-        if isinstance(event["event_date"], datetime):
+        print(event)
+        if isinstance(event['event_date'], datetime):
             event["event_date"] = event["event_date"].strftime('%B %d, %Y')
 
     return render_template("home.html", created_events=created_events, joined_events=joined_events)
@@ -169,14 +170,14 @@ def create_event():
         description = request.form.get("description")
         invitees = request.form.get("invitees").split(",")
         event_creator = current_user.username
-
+        print(event_date)
         try:
-            from datetime import datetime
-            event_timestamp = int(datetime.strptime(event_date,"%Y-%m-%d").timestamp())
+            date_obj = datetime.strptime(event_date,"%Y-%m-%d")
+            # print(event_timestamp)
 
             db.events.insert_one({
                 "event_name": event_name,
-                "date": event_timestamp,
+                "event_date": date_obj.strftime("%B %d, %Y"),
                 "description": description,
                 "invitees":[user.strip() for user in invitees],
                 "creator": event_creator
