@@ -112,6 +112,10 @@ def logout():
     logout_user()
     return redirect(url_for('landing'))
 
+@app.route('/profile')
+def profile():
+    return render_template("profile.html")
+
 @app.route('/create_group', methods=['GET', 'POST'])
 @login_required
 def create_group():
@@ -206,4 +210,4 @@ def your_event_details(event_id):
     return render_template("your_event_details.html", event=event, comments=comments)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=False)
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
