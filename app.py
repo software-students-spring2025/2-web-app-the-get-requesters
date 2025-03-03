@@ -118,10 +118,6 @@ def logout():
     logout_user()
     return redirect(url_for('landing'))
 
-@app.route('/profile')
-def profile():
-    return render_template("profile.html")
-
 @app.route('/create_group', methods=['GET', 'POST'])
 @login_required
 def create_group():

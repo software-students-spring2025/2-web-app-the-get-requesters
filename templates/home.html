@@ -11,12 +11,10 @@
     {% if created_events %}
         <ul>
             {% for event in created_events %}
-            <li>
-                <strong>{{ event.event_name }}</strong> - 
-                {{ event.description }} 
-                <br>Date: {{ event.event_date }}
-            </li>
-        {% endfor %}        
+                <li>
+                    <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.date }})
+                </li>
+            {% endfor %}
         </ul>
     {% else %}
         <p>You haven't created any events yet.</p>
@@ -26,12 +24,10 @@
     {% if joined_events %}
         <ul>
             {% for event in joined_events %}
-            <li>
-                <strong>{{ event.event_name }}</strong> - 
-                {{ event.description }} 
-                <br>Date: {{ event.event_date }}
-            </li>
-        {% endfor %}        
+                <li>
+                    <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.date }})
+                </li>
+            {% endfor %}
         </ul>
     {% else %}
         <p>You haven't joined any events yet.</p>
