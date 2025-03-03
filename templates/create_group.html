@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{{ url_for('home') }}">Back</a>
     <h1>Create a group here</h1>
     <form action="create_group" method="POST">
-        <label for="group_name">Group name:</label>
-        <input type="text" id="group_name" name="group_name" required>
+        <div class="group_name">
+            <label for="group_name">Group name:</label>
+            <input type="text" id="group_name" name="group_name" required>
+        </div>
         <br>
-        <label for="member_name">Members:</label>
-        <input type="text" id="member_name" name="member_name">
-        <br>
-        <button type="submit">Add member</button>
+        <div class="members">
+            <label for="members">Members:</label>
+            <br>
+            {% for member in members %}
+                <label for="{{member.username}}">{{member.username}}</label>
+                <input name="username" type="checkbox" value="{{member.username}}">
+                <br>
+            {% endfor %}
+        </div>
+        <input type="submit" value="Create Group" class="btn">
     </form>
 {% endblock %}
