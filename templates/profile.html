@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Profile</h1>
+    <a href="{{ url_for('home') }}">home</a>
+
+    <h2>Your Groups</h2>
+    {% if created_groups %}
+        <ul>
+            {% for event in created_events %}
+                <li>
+                    <strong>{{ event.event_name }}</strong>
+                    <br>Members:
+                    <ul>
+                        {% for member in group.members %}
+                            <li>{{ member }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't created any groups yet.</p>
+    {% endif %}
+
+    <h2>Groups You Joined</h2>
+    {% if joined_groups %}
+        <ul>
+            {% for group in joined_groups %}
+                <li>
+                    <strong>{{ group.group_name }}</strong> - (Owner: {{ group.owner }})
+                    <br>Members:
+                    <ul>
+                        {% for member in group.members %}
+                            <li>{{ member }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't joined any groups yet.</p>
+    {% endif %}
+{% endblock %}

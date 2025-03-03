@@ -99,12 +99,10 @@ def register():
 @login_required
 def home():
     username = current_user.username
-
     created_events = list(db.events.find({"creator": username}))
     joined_events = list(db.events.find({"attending": username, "creator": {"$ne": username}}))
 
     return render_template("home.html", created_events=created_events, joined_events=joined_events)
-    
 
 @app.route('/logout')
 @login_required
@@ -130,6 +128,15 @@ def create_group():
 def groups():
     groups = groups_collection.find({'members': 'member3'})
     return render_template("groups.html", groups=groups)
+
+@app.route('/profile')
+@login_required
+def profile():
+    username = current_user.username
+    created_groups = list(db.groups.find({"owner": username}))
+    joined_groups = list(db.groups.find({"members": username, "owner": {"$ne": username}}))
+
+    return render_template("profile.html", created_groups=created_groups, joined_groups=joined_groups)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=False)
