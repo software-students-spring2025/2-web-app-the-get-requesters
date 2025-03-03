@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Welcome, {{ current_user.username }}!</h1>
+    <h1>Welcome, <span style="color: lightcyan">{{ current_user.username }}</span>!</h1>
     <a href="{{ url_for('logout') }}">Logout</a>
     <a href="{{ url_for('groups') }}">View Groups</a>
     <a href="{{ url_for('create_event') }}">New Event</a>

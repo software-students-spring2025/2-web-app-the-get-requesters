@@ -1,20 +1,15 @@
 /* using the font */
-:root {
-  font-family: Inter, sans-serif;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
-}
-@supports (font-variation-settings: normal) {
-  :root { font-family: InterVariable, sans-serif; }
-}
 
-.logo-img {
-    width: 200px; 
+.header-img {
+    margin-top: 20px;
+    width: 250px; 
+    margin-bottom: 20px;
 }
 
 body {
   color: white;
   margin: 1vw;
-  font-family: 'Inter';
+  font-family: "Verdana", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-image: linear-gradient(#c57ff7 , #8888fe);
   background-attachment: fixed;
   background-color: #ab69db;
@@ -26,7 +21,7 @@ h1.home-welcome {
   text-align: right;
   display: block;
   float: left;
-  margin: 23vh 0vw 0vh 8vw;
+  /* margin: 23vh 0vw 0vh 8vw; */
   /*width: 15%;*/
 }
 
@@ -216,6 +211,7 @@ p {
 }
 
 .groups-container {
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -223,18 +219,59 @@ p {
 }
 
 .group-container {
-    border: 1px solid black;
+    border: 2px solid rgb(217, 217, 203);
     border-radius: 30px;
-    margin-bottom: 10px;
+    margin: 0px 10px 10px 10px;
     padding: 10px;
     width: auto;
+    text-align: left;
 }
 
 .group_name {
     font-size: 20px;
     font-weight: bold;
+    color: lightcyan;
+    text-align: center;
+}
+
+.members {
+  margin: 5px;
 }
 
 .member_list {
-    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.member_name {
+    padding: 3px;
+}
+
+.member_select {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: left;
+}
+
+.member_select input {
+  width: auto;
+  margin-left: 10px;
+}
+
+#group_name, .group_create{
+  width: 90%;
+}
+
+#group_clickable:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#delete_group {
+  background-color: red;
+  border-color: red;
+}
+
+#delete_group:hover {
+  background-color: darkred;
 }

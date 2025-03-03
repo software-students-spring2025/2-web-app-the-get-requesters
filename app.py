@@ -134,17 +134,16 @@ def create_group():
 @login_required
 def groups():
     groups = list(groups_collection.find({'members': current_user.username}))
-    print(list(groups))
     return render_template("groups.html", groups=groups)
 
-@app.route('/profile')
-@login_required
-def profile():
-    username = current_user.username
-    created_groups = list(groups_collection.find({"owner": username}))
-    joined_groups = list(groups_collection.find({"members": username, "owner": {"$ne": username}}))
+# @app.route('/profile')
+# @login_required
+# def profile():
+#     username = current_user.username
+#     created_groups = list(groups_collection.find({"owner": username}))
+#     joined_groups = list(groups_collection.find({"members": username, "owner": {"$ne": username}}))
 
-    return render_template("profile.html", created_groups=created_groups, joined_groups=joined_groups)
+#     return render_template("profile.html", created_groups=created_groups, joined_groups=joined_groups)
 
 @app.route('/create_event', methods=['GET', 'POST'])
 @login_required
@@ -192,6 +191,31 @@ def create_event():
         #     return redirect(url_for('create_event'))
     members = list(users_collection.find({'username': {'$ne': current_user.username}}))
     return render_template("create_event.html", members=members)
+
+@app.route('/group/<group_name>', methods=['GET', 'POST'])
+@login_required
+def group_details(group_name):
+    if request.method == 'POST':
+        if 'delete_group' in request.form:
+            groups_collection.delete_one({"group_name": request.form['group_name']})
+        elif 'edit_group' in request.form:
+            new_members = request.form.getlist('username')
+            print(request.form)
+            update_operation = { '$set' : 
+                { 'members' : new_members}
+            }
+            groups_collection.update_one({"group_name": request.form['group_name']}, update_operation)
+            
+        return redirect(url_for('groups'))
+
+    group = db.groups.find_one({"group_name": group_name})
+    all_members = users_collection.find({})
+    
+    if not group or group["owner"] != current_user.username:
+        flash("You are not authorized to view this group.", "danger")
+        return redirect(url_for('groups'))
+
+    return render_template("group_details.html", group=group, members=all_members)
 
 @app.route('/event/<event_id>')
 @login_required
