@@ -17,10 +17,12 @@ bcrypt = Bcrypt(app)
 connection = pymongo.MongoClient(os.getenv("MONGODB_URI"))
 db = connection[os.getenv("DB_NAME")]
 users_collection = db["users"]
+groups_collection = db["groups"]
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
+login_manager.login_message = ''
 
 class User(UserMixin):
     def __init__(self, user_data):
@@ -43,8 +45,8 @@ def load_user(user_id):
     return User(user_data)
 
 @app.route('/')
-def index():
-    return redirect(url_for('home'))
+def landing():
+    return render_template('landing.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,13 +59,17 @@ def login():
         
         user_data = users_collection.find_one({"username": username})
         
-        if user_data and bcrypt.check_password_hash(user_data["password"], password):
-            user = User(user_data)
-            login_user(user)
-            
-            next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('home'))
-    
+        if user_data:
+            if bcrypt.check_password_hash(user_data["password"], password):
+                user = User(user_data)
+                login_user(user)
+                
+                next_page = request.args.get('next')
+                return redirect(next_page if next_page else url_for('home'))
+            else:
+                flash('Invalid password. Please try again.', 'danger')
+        else:
+            flash('User does not exist. Please try again.', 'danger')
     return render_template("login.html")
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -85,18 +91,46 @@ def register():
                 "password": hashed_password
             })
             return redirect(url_for('login'))
+        else:
+            flash('Username already exists. Please choose a different one.', 'danger')
 
     return render_template("register.html")
 
 @app.route('/home')
+@login_required
 def home():
-    return render_template("home.html")
+    username = current_user.username
+
+    created_events = list(db.events.find({"creator": username}))
+    joined_events = list(db.events.find({"attending": username, "creator": {"$ne": username}}))
+
+    return render_template("home.html", created_events=created_events, joined_events=joined_events)
+    
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('landing'))
+
+@app.route('/create_group', methods=['GET', 'POST'])
+@login_required
+def create_group():
+    if request.method == 'POST':
+        group_name = request.form['group_name']
+        members = []
+        member = request.form['member_name']
+        members.append(member)
+        new_group = groups_collection.insert_one({'owner_id': current_user.get_id(), 'group_name': group_name, 'members': members})
+        return redirect(url_for('groups'))
+        
+    return render_template("create_group.html")
+
+@app.route('/groups')
+@login_required
+def groups():
+    groups = groups_collection.find({'members': 'member3'})
+    return render_template("groups.html", groups=groups)
 
 @app.route('/create_event', methods=['GET', 'POST'])
 @login_required
