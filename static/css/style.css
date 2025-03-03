@@ -1,20 +1,18 @@
-body {
-    margin: 20px;
-    text-align: center;
-    background-color: #ffffff;
+/* using the font */
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+}
+@supports (font-variation-settings: normal) {
+  :root { font-family: InterVariable, sans-serif; }
 }
 
-header {
-    display: block;
-    padding: 10px 15px;
-    background: #E0AEE3;
-    color: black;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 10px;
-    position: absolute;
-    top: 10px;
-    left: 10px;
+.header {
+  margin: 0px;
+  text-decoration: none;
+  align-items: center;
+  height: 20vh;
+  width: 100%;
 }
 
 .logo-image {
@@ -22,134 +20,206 @@ header {
     width: 150px;
 }
 
+body {
+  color: white;
+  margin: 1vw;
+  font-family: 'Inter';
+  background-image: linear-gradient(#c57ff7 , #8888fe);
+  background-attachment: fixed;
+  background-color: #ab69db;
+  text-align: center; /* may have to change */
+}
+
+/* welcome to Gathr! home page text */
+h1.home-welcome {
+  text-align: right;
+  display: block;
+  float: left;
+  margin: 23vh 0vw 0vh 8vw;
+  /*width: 15%;*/
+}
+
+.vert-line {
+border-left: 3px solid white;
+height: 52vh;
+position: fixed;
+top: 30vh; left: 50vw;
+}
+
+a {
+/* display: block; */
+margin: 1vh auto;
+}
+
+/* start of profile button */
+#rcorner {
+border-radius: 25px;
+border: 0px;
+width: 17vh;
+font-size: 18px;
+height: 5vh; 
+display: inline-flex; 
+flex-direction: column;
+justify-content: center;
+text-align: center;
+vertical-align: middle;
+}
+
+a.profile-link:link, a.profile-link:visited {
+background-color: #c136f4;
+color: white;
+text-decoration: none;
+margin: 40vh 0vw 0vh 0vw;
+}
+
+a.profile-link:hover, a.profile-link:active {
+background-color: rgb(113, 108, 222);
+}
+/* end of profile button */
+
+img {
+display: block;
+margin: 0 auto;
+}
+
+/* text box on profile page */
+.profile_box {
+  display: block;
+  margin: auto;
+  height: 5vh;
+  width: 30vw;
+}
+
+/* home button */
 .home-button:hover {
-    background:#D49AD5;
+  background:#D49AD5;
 }
 
 h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
 form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-    margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
 }
 
 input, textarea {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    background: #E7DCE6;
-    font-size: 16px;
-    text-align: center;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: #E7DCE6;
+  font-size: 16px;
+  text-align: center;
 }
 
 textarea {
-    height: 80px;
-    resize: none;
+  height: 80px;
+  resize: none;
 }
 
 button {
-    width: 100%;
-    padding: 12px;
-    background: #E0AEE3;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    color: black;
-    cursor: pointer;
-    margin-top: 15px;
+  width: 105%;
+  padding: 12px;
+  background: #E0AEE3;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: black;
+  cursor: pointer;
+  margin-top: 15px;
+  text-align: center;
 }
 
 button:hover {
-    background: #D49AD5;
+  background: #D49AD5;
 }
 
 /* Event Details Page */
 h1 {
-    font-size: 32px;
-    font-weight: bold;
-    margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 h3 {
-    font-size: 18px;
-    color: gray;
-    margin-bottom: 20px;
+  font-size: 18px;
+  /*color: gray;*/
+  margin-bottom: 20px;
 }
 
 p {
-    font-size: 16px;
-    margin-bottom: 20px;
-    line-height: 1.5;
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 /* Attendees Section */
 .attendees {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .profile-picture {
-    width: 80px;
-    height: 80px;
-    background: lightgray;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    border-radius: 10px;
+  width: 80px;
+  height: 80px;
+  background: lightgray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 10px;
 }
 
 /* Comments Section */
 .comments {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .comment {
-    display: flex;
-    align-items: center;
-    width: 80%;
-    padding: 10px;
-    border-radius: 10px;
+  display: flex;
+  align-items: center;
+  width: 80%;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .comment .profile-picture {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 /* Edit Button */
 .edit-button {
-    display: block;
-    width: 200px;
-    padding: 15px;
-    margin: 20px auto;
-    background: #E0AEE3;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 10px;
-    color: black;
-    text-decoration: none;
+  display: block;
+  width: 200px;
+  padding: 15px;
+  margin: 20px auto;
+  background: #E0AEE3;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 10px;
+  color: white;
+  text-decoration: none;
 }
 
 .edit-button:hover {
-    background: #D49AD5;
+  background: #D49AD5;
 }
 
 .danger {
-    color: red;
+  color: red;
 }

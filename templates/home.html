@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <br >
     <a href="{{ url_for('groups') }}">View your groups</a>
     <a href="{{ url_for('create_group') }}">Create a group</a>
+    <!-- adding profile link here -->
+    <a href="{{ url_for('profile') }}">Profile</a>
+    <!-- removing id='rcorner' class="profile-link" for now -->
+    <!-- id='rcorner' class="profile-link" -->
+     <!-- taking 'welcome to Gathr! and vert line ' out for now -->
+     <!-- 
+     <h1 style="text-align:left" class="home-welcome" >welcome<br >to<br >Gathr!</h1>
+         <div class="vert-line"></div>
+    -->
 
     <h2>Your Created Events</h2>
     {% if created_events %}
@@ -29,4 +39,6 @@
     {% else %}
         <p>You haven't joined any events yet.</p>
     {% endif %}
+
+   
 {% endblock %}
