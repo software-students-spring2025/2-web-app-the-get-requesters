@@ -1,10 +1,44 @@
 {% extends "base.html" %}
 
 {% block content %}
-<br >
-    <h1 style="text-align:right" >welcome<br >to<br >Gathr!</h1>
-        <!-- adding profile page here -->
-        <div class="vert-line"></div>
-        <a id='rcorner' class="profile-link" href="{{ url_for('profile') }}">Profile</a>
-        
+    <br >
+    <a href="{{ url_for('groups') }}">View your groups</a>
+    <a href="{{ url_for('create_group') }}">Create a group</a>
+    <!-- adding profile link here -->
+    <a href="{{ url_for('profile') }}">Profile</a>
+    <!-- removing id='rcorner' class="profile-link" for now -->
+    <!-- id='rcorner' class="profile-link" -->
+     <!-- taking 'welcome to Gathr! and vert line ' out for now -->
+     <!-- 
+     <h1 style="text-align:left" class="home-welcome" >welcome<br >to<br >Gathr!</h1>
+         <div class="vert-line"></div>
+    -->
+
+    <h2>Your Created Events</h2>
+    {% if created_events %}
+        <ul>
+            {% for event in created_events %}
+                <li>
+                    <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.date }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't created any events yet.</p>
+    {% endif %}
+
+    <h2>Events You Joined</h2>
+    {% if joined_events %}
+        <ul>
+            {% for event in joined_events %}
+                <li>
+                    <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.date }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't joined any events yet.</p>
+    {% endif %}
+
+   
 {% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="{{ url_for('home') }}">Back</a>
+    <h1>View your groups here</h1>
+    <div class='groups-container'>
+    {% for group in groups %}
+        <div class='group-container'>
+            <h3>{{ group['group_name'] }}</h3>
+            {% for member in group['members'] %}
+                <span>{{member}}, </span>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}

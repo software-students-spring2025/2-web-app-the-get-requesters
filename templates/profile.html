@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
+
 {% block content %}
+<a href="{{ url_for('home') }}">Back</a>
     <h2 style="text-align:center">Your Profile</h2>
         <a class='profile-img'>
             <img src="/img/default_profile.png" alt="Profile">
@@ -8,5 +10,4 @@
     <h3 style="text-align:center">About Me</h3>
         <p class='profile_box' contenteditable="true">
         Click to insert a short description of yourself here!</p>
-
 {% endblock %}
