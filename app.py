@@ -8,7 +8,7 @@ from bson.objectid import ObjectId
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='/')
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 app.secret_key = os.getenv("SECRET_KEY")
 
 bcrypt = Bcrypt(app)
@@ -90,6 +90,10 @@ def register():
 @app.route('/home')
 def home():
     return render_template("home.html")
+
+@app.route('/profile')
+def profile():
+    return render_template("profile.html")
 
 @app.route('/logout')
 @login_required

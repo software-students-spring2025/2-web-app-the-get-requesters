@@ -1,13 +1,87 @@
-body {
-    margin: 5px;
-}
+/* using the font */
+:root {
+    font-family: Inter, sans-serif;
+    font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+  }
+  @supports (font-variation-settings: normal) {
+    :root { font-family: InterVariable, sans-serif; }
+  }
 
-header {
+.header {
+    margin: 0px;
     display: flex;
     align-items: center;
+    height: 20vh;
+    width: 100%;
 }
 
-.logo-image {
-    height: 75px;
-    width: 150px;
+body {
+    color: white;
+    margin: 1vw;
+    font-family: 'Inter';
+    background-image: linear-gradient(#c57ff7 , #8888fe);
+    background-attachment: fixed;
+    background-color: #ab69db;
+    text-align: center; /* may have to change */
 }
+
+/* welcome to Gathr! home page text */
+h1 {
+    text-align: right;
+    display: block;
+    float: left;
+    margin: 23vh 0vw 0vh 8vw;
+    /*width: 15%;*/
+}
+
+.vert-line {
+  border-left: 3px solid white;
+  height: 52vh;
+  position: fixed;
+  top: 30vh; left: 50vw;
+}
+
+a {
+  display: block;
+  margin: 0 auto;
+}
+
+/* start of profile button */
+#rcorner {
+  border-radius: 25px;
+  border: 0px;
+  width: 17vh;
+  font-size: 18px;
+  height: 5vh; 
+  display: inline-flex; 
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
+}
+
+a.profile-link:link, a.profile-link:visited {
+  background-color: #c136f4;
+  color: white;
+  text-decoration: none;
+  margin: 40vh 0vw 0vh 0vw;
+}
+
+a.profile-link:hover, a.profile-link:active {
+  background-color: rgb(113, 108, 222);
+}
+/* end of profile button */
+
+img {
+  display: block;
+  margin: 0 auto;
+}
+
+/* text box on profile page */
+.profile_box {
+    display: block;
+    margin: auto;
+    height: 7vh;
+    width: 20vw;
+}
+
