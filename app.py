@@ -103,8 +103,8 @@ def register():
 @login_required
 def home():
     username = current_user.username
-    created_events = list(events_collection.find({"creator": username}))
-    joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
+    created_events = list(events_collection.find({"owner": username}))
+    joined_events = list(events_collection.find({"invitees": username, "owner": {"$ne": username}}))
 
     for event in created_events + joined_events:
         print(event)
@@ -169,7 +169,7 @@ def create_event():
         event_date = request.form.get("event_date")
         description = request.form.get("description")
         invitees = request.form.get("invitees").split(",")
-        event_creator = current_user.username
+        event_owner = current_user.username
         print(event_date)
         try:
             date_obj = datetime.strptime(event_date,"%Y-%m-%d")
@@ -180,7 +180,7 @@ def create_event():
                 "event_date": date_obj.strftime("%B %d, %Y"),
                 "description": description,
                 "invitees":[user.strip() for user in invitees],
-                "creator": event_creator
+                "owner": event_owner
             })
 
             flash("Event created successfully!", "success")
@@ -191,6 +191,51 @@ def create_event():
             return redirect(url_for('create_event'))
     return render_template("create_event.html")
 
+@app.route('/delete_event/<event_name>', methods=['POST'])
+@login_required
+def delete_event(event_name):
+    # Find the event by name
+    event = events_collection.find_one({"event_name": event_name})
+    
+    if not event:
+        flash("Event not found.", "danger")
+        return redirect(url_for('home'))
+    
+    if event['owner'] != current_user.username:
+        flash("You can only delete events you created.", "danger")
+        return redirect(url_for('home'))
+    
+    events_collection.delete_one({"event_name": event_name})
+    
+    flash(f"Event '{event_name}' has been deleted.", "success")
+    return redirect(url_for('home'))
+
+@app.route('/leave_event/<event_name>', methods=['POST'])
+@login_required
+def leave_event(event_name):
+    # Find the event by name
+    event = events_collection.find_one({"event_name": event_name})
+    
+    if not event:
+        flash("Event not found.", "danger")
+        return redirect(url_for('home'))
+    
+    if current_user.username not in event.get('invitees', []):
+        flash("You are not a participant in this event.", "danger")
+        return redirect(url_for('home'))
+    
+    if event['owner'] == current_user.username:
+        flash("As the creator, you can't leave your own event. You can delete it instead.", "warning")
+        return redirect(url_for('home'))
+    
+    events_collection.update_one(
+        {"event_name": event_name},
+        {"$pull": {"invitees": current_user.username}}
+    )
+    
+    flash(f"You have left the event '{event_name}'.", "success")
+    return redirect(url_for('home'))
+
 @app.route('/event/<event_id>')
 @login_required
 def your_event_details(event_id):
@@ -200,7 +245,7 @@ def your_event_details(event_id):
 
     event = {
         "event_id": "test",
-        "creator": "lana",
+        "owner": "lana",
         "date": 1740897357,
         "invitees": ["andrew", "samantha", "lana", "jack"]
     }
