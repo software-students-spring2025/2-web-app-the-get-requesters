@@ -47,6 +47,8 @@ def load_user(user_id):
 
 @app.route('/')
 def landing():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     return render_template('landing.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -119,6 +121,7 @@ def logout():
 @app.route('/create_group', methods=['GET', 'POST'])
 @login_required
 def create_group():
+    members = list(users_collection.find({'username': {'$ne': current_user.username}}))
     if request.method == 'POST':
         group_name = request.form['group_name']
         members = [member.strip() for member in request.form['members'].split(',') if member.strip()]
@@ -139,12 +142,13 @@ def create_group():
         new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': list(members)})
         return redirect(url_for('profile'))
         
-    return render_template("create_group.html")
+    return render_template("create_group.html", members=members)
 
 @app.route('/groups')
 @login_required
 def groups():
-    groups = groups_collection.find({'members': 'member3'})
+    groups = list(groups_collection.find({'members': current_user.username}))
+    print(list(groups))
     return render_template("groups.html", groups=groups)
 
 @app.route('/profile')

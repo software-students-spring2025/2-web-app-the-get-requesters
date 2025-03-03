@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="{{ url_for('home') }}" class="home-button">Home</a>
+    <h2> Create a New Event</h2>
+    
+    <form action="{{url_for('create_event')}}" method="POST">
+        <label for="event_name">Event Name</label>
+        <input type="text" id="event_name" name="event_name" required>
+
+        <label for="event_date">Date (MM/DD/YYYY)</label>
+        <input type="date" id="event_date" name="event_date" required>
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description" required></textarea>
+        
+        <label for="invitees">Invite People</label>
+        <input type="text" id="invitees" name="invitees" required>
+
+        <button type="submit">Create</button>
+    </form>
+{% endblock %}
