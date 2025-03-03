@@ -11,9 +11,23 @@
         <a class='logo-img' href="/home">
            <img src="/img/logo.png" alt="Logo">
         </a>
-        < replace this
+        {% if current_user.is_authenticated %}
+        <div class="user-label">
+            Welcome <i>{{current_user.username}}</i>!
+            <a class="logout-button" href="/logout">Logout</a>
+        </div>
+        {% endif %}
     </header>
     <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="messages">
+            {% for category, message in messages %}
+            <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
     {% block content %}
         {# #}
     {% endblock %}
