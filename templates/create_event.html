@@ -14,8 +14,15 @@
         <label for="description">Description</label>
         <textarea id="description" name="description" required></textarea>
         
-        <label for="invitees">Invite People</label>
-        <input type="text" id="invitees" name="invitees" required>
+        <div class="invitees">
+            <label for="invitees" name="invitees">Invite People:</label>
+            <br>
+            {% for member in members %}
+                <label for="{{member.username}}">{{member.username}}</label>
+                <input name="username" type="checkbox" value="{{member.username}}">
+                <br>
+            {% endfor %}
+        </div>
 
         <button type="submit">Create</button>
     </form>

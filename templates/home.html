@@ -3,21 +3,25 @@
 {% block content %}
     <h1>Welcome, {{ current_user.username }}!</h1>
     <a href="{{ url_for('logout') }}">Logout</a>
-    <a href="{{ url_for('profile') }}">Profile</a>
+    <a href="{{ url_for('groups') }}">View Groups</a>
     <a href="{{ url_for('create_event') }}">New Event</a>
     <a href="{{ url_for('create_group') }}">New Group</a>
 
     <h2>Your Created Events</h2>
-    {% if created_events %}
-        <ul>
-            {% for event in created_events %}
-            <li>
-                <strong>{{ event.event_name }}</strong> - 
-                {{ event.description }} 
-                <br>Date: {{ event.event_date }}
-            </li>
-        {% endfor %}        
-        </ul>
+    {% if events %}
+    <div class='groups-container'>
+        {% for event in events %}
+            <div class='event-container'>
+                <h3>{{ event.event_name }}</h3>
+                <div>Description: {{ event.description }}</div>
+                <div>When: {{ event.event_date }}</div>
+                <div> Invited: </div>
+                {% for member in event['invitees'] %}
+                    <span>{{member}}, </span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        </div>
     {% else %}
         <p>You haven't created any events yet.</p>
     {% endif %}

@@ -2,14 +2,17 @@
 
 {% block content %}
 <a href="{{ url_for('home') }}">Back</a>
-    <h1>View your groups here</h1>
+    <h1>Your Groups</h1>
     <div class='groups-container'>
     {% for group in groups %}
         <div class='group-container'>
-            <h3>{{ group['group_name'] }}</h3>
+            <div class="group_name">{{ group['group_name'] }}</div>
+            <div><b>Owner:</b> {{group.owner}}</div>
+            <span><b>Invited:</b> </span>
             {% for member in group['members'] %}
-                <span>{{member}}, </span>
+                <span class='member_name'>{{member}}</span>
             {% endfor %}
+            <br>
         </div>
     {% endfor %}
     </div>

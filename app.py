@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='/')
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 app.secret_key = os.getenv("SECRET_KEY")
 
 bcrypt = Bcrypt(app)
@@ -103,15 +103,8 @@ def register():
 @login_required
 def home():
     username = current_user.username
-    created_events = list(events_collection.find({"creator": username}))
-    joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
-
-    for event in created_events + joined_events:
-        print(event)
-        if isinstance(event['event_date'], datetime):
-            event["event_date"] = event["event_date"].strftime('%B %d, %Y')
-
-    return render_template("home.html", created_events=created_events, joined_events=joined_events)
+    events = list(events_collection.find({"invitees": username}))
+    return render_template("home.html", events=events)
 
 @app.route('/logout')
 @login_required
@@ -125,23 +118,11 @@ def create_group():
     members = list(users_collection.find({'username': {'$ne': current_user.username}}))
     if request.method == 'POST':
         group_name = request.form['group_name']
-        members = [member.strip() for member in request.form['members'].split(',') if member.strip()]
-        members = list(set(members))
-
-        existing_group = groups_collection.find_one({"group_name": group_name})
-        if existing_group:
-            flash(f"This group already exists", "warning")
-            return redirect(url_for('create_group'))
-
-        valid_users = {user["username"] for user in users_collection.find({"username": {"$in": members}})}
-        invalid_users = set(members) - valid_users
-        members = list(valid_users)
-        if invalid_users:
-            flash(f"The following users were not found: {', '.join(invalid_users)}", "warning")
-            return redirect(url_for('create_group'))
-
-        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': list(members)})
-        return redirect(url_for('profile'))
+        if groups_collection.find_one({'group_name': group_name}):
+             flash("Group name is already taken. Please pick another", "danger")
+        members = [current_user.username] + request.form.getlist('username')
+        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': members})
+        return redirect(url_for('groups'))
         
     return render_template("create_group.html", members=members)
 
@@ -165,56 +146,52 @@ def profile():
 @login_required
 def create_event():
     if request.method == 'POST':
-        event_name = request.form.get("event_name")
-        event_date = request.form.get("event_date")
+        event_name = request.form['event_name']
+        if groups_collection.find_one({'event_name': event_name}):
+            ("Group name is already taken. Please pick another", "danger")
+        invitees = [current_user.username] + request.form.getlist('username')
         description = request.form.get("description")
-        invitees = request.form.get("invitees").split(",")
-        event_creator = current_user.username
-        print(event_date)
-        try:
-            date_obj = datetime.strptime(event_date,"%Y-%m-%d")
-            # print(event_timestamp)
-
-            db.events.insert_one({
-                "event_name": event_name,
-                "event_date": date_obj.strftime("%B %d, %Y"),
-                "description": description,
-                "invitees":[user.strip() for user in invitees],
-                "creator": event_creator
+        event_date = request.form.get("event_date")
+        date_obj = datetime.strptime(event_date,"%Y-%m-%d")
+        new_event = events_collection.insert_one({
+            'owner': current_user.username,
+            'event_name': event_name, 
+            'invitees': invitees,
+            'description': description,
+            'event_date': date_obj.strftime("%B %d, %Y")
             })
+        flash("Event created successfully!", "success")
+        return redirect(url_for('home'))
+    
+        # event_name = request.form.get("event_name")
+        # event_date = request.form.get("event_date")
+        # description = request.form.get("description")
+        # invitees = request.form.get("invitees").split(",")
+        # event_creator = current_user.username
+        # print(event_date)
+        # try:
+        #     date_obj = datetime.strptime(event_date,"%Y-%m-%d")
 
-            flash("Event created successfully!", "success")
-            return redirect(url_for('home'))
+        #     db.events.insert_one({
+        #         "event_name": event_name,
+        #         "event_date": date_obj.strftime("%B %d, %Y"),
+        #         "description": description,
+        #         "invitees":[user.strip() for user in invitees],
+        #         "creator": event_creator
+        #     })
+
+        #     flash("Event created successfully!", "success")
+        #     return redirect(url_for('home'))
         
-        except Exception as e:
-            flash(f"Error: {str(e)}", "danger")
-            return redirect(url_for('create_event'))
-    return render_template("create_event.html")
+        # except Exception as e:
+        #     flash(f"Error: {str(e)}", "danger")
+        #     return redirect(url_for('create_event'))
+    members = list(users_collection.find({'username': {'$ne': current_user.username}}))
+    return render_template("create_event.html", members=members)
 
 @app.route('/event/<event_id>')
 @login_required
 def your_event_details(event_id):
-    event_id = "test"
-    """
-    Test data
-
-    event = {
-        "event_id": "test",
-        "creator": "lana",
-        "date": 1740897357,
-        "invitees": ["andrew", "samantha", "lana", "jack"]
-    }
-    comments = [
-        {
-            "user": "andrew",
-            "text": "nice!"
-        },
-        {
-            "user": "lana",
-            "text": "thanks!"
-        }
-    ]
-    """
     event = db.events.find_one({"_id": ObjectId(event_id)})
 
     if not event or event["creator"] != current_user.username:

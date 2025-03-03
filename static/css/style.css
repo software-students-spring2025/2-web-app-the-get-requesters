@@ -4,22 +4,8 @@ body {
     background-color: #ffffff;
 }
 
-header {
-    display: block;
-    padding: 10px 15px;
-    background: #E0AEE3;
-    color: black;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 10px;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-}
-
-.logo-image {
-    height: 75px;
-    width: 150px;
+.logo-img {
+    width: 200px; 
 }
 
 .home-button:hover {
@@ -152,4 +138,28 @@ p {
 
 .danger {
     color: red;
+}
+
+.groups-container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+
+}
+
+.group-container {
+    border: 1px solid black;
+    border-radius: 30px;
+    margin-bottom: 10px;
+    padding: 10px;
+    width: auto;
+}
+
+.group_name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.member_list {
+    margin-right: 10px;
 }
