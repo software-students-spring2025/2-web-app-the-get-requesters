@@ -18,6 +18,7 @@ connection = pymongo.MongoClient(os.getenv("MONGODB_URI"))
 db = connection[os.getenv("DB_NAME")]
 users_collection = db["users"]
 groups_collection = db["groups"]
+events_collection = db["events"]
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
@@ -102,12 +103,15 @@ def register():
 @login_required
 def home():
     username = current_user.username
+    created_events = list(events_collection.find({"creator": username}))
+    joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
 
-    created_events = list(db.events.find({"creator": username}))
-    joined_events = list(db.events.find({"attending": username, "creator": {"$ne": username}}))
+    for event in created_events + joined_events:
+        print(event)
+        if isinstance(event['event_date'], datetime):
+            event["event_date"] = event["event_date"].strftime('%B %d, %Y')
 
     return render_template("home.html", created_events=created_events, joined_events=joined_events)
-    
 
 @app.route('/logout')
 @login_required
@@ -115,19 +119,29 @@ def logout():
     logout_user()
     return redirect(url_for('landing'))
 
-@app.route('/profile')
-def profile():
-    return render_template("profile.html")
-
 @app.route('/create_group', methods=['GET', 'POST'])
 @login_required
 def create_group():
     members = list(users_collection.find({'username': {'$ne': current_user.username}}))
     if request.method == 'POST':
         group_name = request.form['group_name']
-        members = [current_user.username] + request.form.getlist('username')
-        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': members})
-        return redirect(url_for('groups'))
+        members = [member.strip() for member in request.form['members'].split(',') if member.strip()]
+        members = list(set(members))
+
+        existing_group = groups_collection.find_one({"group_name": group_name})
+        if existing_group:
+            flash(f"This group already exists", "warning")
+            return redirect(url_for('create_group'))
+
+        valid_users = {user["username"] for user in users_collection.find({"username": {"$in": members}})}
+        invalid_users = set(members) - valid_users
+        members = list(valid_users)
+        if invalid_users:
+            flash(f"The following users were not found: {', '.join(invalid_users)}", "warning")
+            return redirect(url_for('create_group'))
+
+        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': list(members)})
+        return redirect(url_for('profile'))
         
     return render_template("create_group.html", members=members)
 
@@ -138,6 +152,15 @@ def groups():
     print(list(groups))
     return render_template("groups.html", groups=groups)
 
+@app.route('/profile')
+@login_required
+def profile():
+    username = current_user.username
+    created_groups = list(groups_collection.find({"owner": username}))
+    joined_groups = list(groups_collection.find({"members": username, "owner": {"$ne": username}}))
+
+    return render_template("profile.html", created_groups=created_groups, joined_groups=joined_groups)
+
 @app.route('/create_event', methods=['GET', 'POST'])
 @login_required
 def create_event():
@@ -147,14 +170,14 @@ def create_event():
         description = request.form.get("description")
         invitees = request.form.get("invitees").split(",")
         event_creator = current_user.username
-
+        print(event_date)
         try:
-            from datetime import datetime
-            event_timestamp = int(datetime.strptime(event_date,"%Y-%m-%d").timestamp())
+            date_obj = datetime.strptime(event_date,"%Y-%m-%d")
+            # print(event_timestamp)
 
             db.events.insert_one({
                 "event_name": event_name,
-                "date": event_timestamp,
+                "event_date": date_obj.strftime("%B %d, %Y"),
                 "description": description,
                 "invitees":[user.strip() for user in invitees],
                 "creator": event_creator
