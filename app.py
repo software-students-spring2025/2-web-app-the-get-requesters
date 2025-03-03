@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='/')
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 app.secret_key = os.getenv("SECRET_KEY")
 
 bcrypt = Bcrypt(app)
@@ -117,6 +117,10 @@ def home():
 def logout():
     logout_user()
     return redirect(url_for('landing'))
+
+@app.route('/profile')
+def profile():
+    return render_template("profile.html")
 
 @app.route('/create_group', methods=['GET', 'POST'])
 @login_required
@@ -228,4 +232,4 @@ def your_event_details(event_id):
     return render_template("your_event_details.html", event=event, comments=comments)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=False)
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
