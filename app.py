@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='public', static_url_path='/')
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 app.secret_key = os.getenv("SECRET_KEY")
 
 bcrypt = Bcrypt(app)
@@ -160,7 +160,10 @@ def create_event():
         except Exception as e:
             flash(f"Error: {str(e)}", "danger")
             return redirect(url_for('create_event'))
-    return render_template("create_event.html")
+    
+    members = list(users_collection.find({'username': {'$ne': current_user.username}}))
+    groups = list(groups_collection.find())
+    return render_template("create_event.html", members=members, groups=groups)
 
 @app.route('/event/<event_id>')
 @login_required
@@ -198,6 +201,39 @@ def your_event_details(event_id):
     comments = list(db.comments.find({"event_id": event_id}))
     
     return render_template("your_event_details.html", event=event, comments=comments)
+
+@app.route('/edit_event/<event_id>')
+@login_required
+def edit_event(event_id):
+    if request.method == 'POST':
+        event_name = request.form.get("event_name")
+        event_date = request.form.get("event_date")
+        description = request.form.get("description")
+        invitees = request.form.get("invitees").split(",")
+        event_creator = current_user.username
+
+        try:
+            from datetime import datetime
+            event_timestamp = int(datetime.strptime(event_date,"%Y-%m-%d").timestamp())
+
+            # TODO: make sure this updates correctly
+            db.events.insert_one({
+                "event_name": event_name,
+                "date": event_timestamp,
+                "description": description,
+                "invitees":[user.strip() for user in invitees],
+                "creator": event_creator
+            })
+
+            flash("Event updated successfully!", "success")
+            return redirect(url_for('home'))
+        
+        except Exception as e:
+            flash(f"Error: {str(e)}", "danger")
+            return redirect(url_for('create_event'))
+        
+    event = db.events.find_one({"_id": ObjectId(event_id)})
+    return render_template("edit_event.html", event=event)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=False)
