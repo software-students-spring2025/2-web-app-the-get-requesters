@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="{{ url_for('home') }}" class="home-button">Home</a>
+
+    <h1>{{ event.event_name }}</h1>
+    <h3>{{ event.date_display }}</h3>
+
+    <p>{{ event.description }}</p>
+
+    <h2>Attendees</h2>
+    <div class="attendees">
+        {% for attendee in event.invitees[:4] %}
+            <div class="profile-picture">Profile Picture</div>
+        {% endfor %}
+        {% if event.invitees|length > 4 %}
+            <span>+{{ event.invitees|length - 4 }} more</span>
+        {% endif %}
+    </div>
+
+    <h2>{{ comments|length }} Comments</h2>
+    <div class="comments">
+        {% for comment in comments %}
+            <div class="comment">
+                <div class="profile-picture">Profile Picture</div>
+                <p>{{ comment.text }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!--
+    Uncomment once we create edit_event
+    <a href="{{ url_for('edit_event', event_id=event._id) }}" class="edit-button">Edit</a>
+    -->
+    <a href="" class="edit-button">Edit</a>
+    
+
+{% endblock %}
