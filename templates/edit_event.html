@@ -5,11 +5,11 @@
     <h2> Edit Event</h2>
 
     <form action="{{ url_for('edit_event', event_id=event._id) }}" method="POST">
-        <label>Event Name:</label>
+        <label>Event Name</label>
         <input type="text" name="event_name" value="{{ event.event_name }}" required>
 
-        <label>Date:</label>
-        <input type="date" name="event_date" value="{{ event.date_formatted }}" required>
+        <label>Date (MM/DD/YYYY)</label>
+        <input type="date" name="event_date" value="{{ event.event_date }}" required>
 
         <label>Description:</label>
         <textarea name="description" required>{{ event.description }}</textarea>
@@ -20,7 +20,9 @@
             <br>
             {% for member in members %}
                 <label for="{{member.username}}">{{member.username}}</label>
-                <input name="username" type="checkbox" value="{{member.username}}">
+                <input name="username" type="checkbox" value="{{member.username}}"
+                    {% if member.username in event.invitees %}checked{% endif %}
+                >
                 <br>
             {% endfor %}
         </div>
@@ -31,7 +33,9 @@
             <br>
             {% for group in groups %}
                 <label for="{{group.group_name}}">{{group.group_name}}</label>
-                <input name="group_name" type="checkbox" value="{{group.group_name}}">
+                <input name="group_name" type="checkbox" value="{{group.group_name}}"
+                    {% if group.group_name in event.invited_groups %}checked{% endif %}
+                >
                 <br>
             {% endfor %}
         </div>
