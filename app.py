@@ -206,4 +206,4 @@ def your_event_details(event_id):
     return render_template("your_event_details.html", event=event, comments=comments)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=False)
