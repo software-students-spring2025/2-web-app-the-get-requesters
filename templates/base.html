@@ -12,14 +12,8 @@
 <body>
     <header class="header">
         <a class='logo-img' href="/home">
-            <img class="header-img" style="text-align: center;" src="/img/new_logo.png" alt="Logo">
+            <img class="header-img" style="text-align: center;" src="/img/chatgpt_gathr_logo.png" alt="Logo">
         </a>
-        {% if current_user.is_authenticated %}
-        <div class="user-label">
-            Welcome <i>{{current_user.username}}</i>!
-            <a class="logout-button" href="/logout">Logout</a>
-        </div>
-        {% endif %}
     </header>
     <main>
     {% with messages = get_flashed_messages(with_categories=true) %}
