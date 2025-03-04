@@ -4,17 +4,20 @@
     <a href="{{ url_for('home') }}" class="home-button">Home</a>
 
     <h1>{{ event.event_name }}</h1>
-    <h3>{{ event.date_display }}</h3>
+    <h3>{{ event.event_date }}</h3>
 
     <p>{{ event.description }}</p>
 
     <h2>Attendees</h2>
     <div class="attendees">
-        {% for attendee in event.invitees[:4] %}
-            <div class="profile-picture">Profile Picture</div>
+        {% for attendee in event.attending[:4] %}
+            <div>
+                <div class="profile-picture">Profile Picture</div>
+                <p>{{ attendee }}</p>
+            </div>
         {% endfor %}
-        {% if event.invitees|length > 4 %}
-            <span>+{{ event.invitees|length - 4 }} more</span>
+        {% if event.attending|length > 4 %}
+            <span>+{{ event.attending|length - 4 }} more</span>
         {% endif %}
     </div>
 
@@ -29,9 +32,13 @@
     </div>
 
     {% if current_user.username == event.creator %}
-        <a href="{{ url_for('rsvp_event', event_id=event._id) }}" class="edit-button">RSVP</a>
+        <form action="{{ url_for('edit_event', event_id=event._id) }}" method="get">
+            <button type="submit" class="edit-button">Edit</button>
+        </form>
     {% else %}
-        <a href="{{ url_for('edit_event', event_id=event._id) }}" class="edit-button">Edit</a>
+        <form action="{{ url_for('rsvp_event', event_id=event._id) }}" method="post">
+            <button type="submit" class="edit-button">RSVP</button>
+        </form>
     {% endif %}
 
 {% endblock %}
