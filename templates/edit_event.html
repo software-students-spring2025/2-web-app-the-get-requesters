@@ -2,18 +2,18 @@
 
 {% block content %}
     <a href="{{ url_for('home') }}" class="home-button">Home</a>
-    <h2> Create a New Event</h2>
-    
-    <form action="{{url_for('create_event')}}" method="POST">
-        <label for="event_name">Event Name</label>
-        <input type="text" id="event_name" name="event_name" required>
+    <h2> Edit Event</h2>
 
-        <label for="event_date">Date (MM/DD/YYYY)</label>
-        <input type="date" id="event_date" name="event_date" required>
+    <form action="{{ url_for('edit_event', event_id=event._id) }}" method="POST">
+        <label>Event Name:</label>
+        <input type="text" name="event_name" value="{{ event.event_name }}" required>
 
-        <label for="description">Description</label>
-        <textarea id="description" name="description" required></textarea>
-        
+        <label>Date:</label>
+        <input type="date" name="event_date" value="{{ event.date_formatted }}" required>
+
+        <label>Description:</label>
+        <textarea name="description" required>{{ event.description }}</textarea>
+
         <label for="members">Invite People</label>
         <div class="members">
             <label for="members">People:</label>
@@ -36,8 +36,7 @@
             {% endfor %}
         </div>
 
-        <button type="submit">Create</button>
+        <button type="submit">Save Changes</button>
     </form>
-
 
 {% endblock %}
