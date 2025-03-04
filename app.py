@@ -253,7 +253,7 @@ def leave_event(event_id):
         flash("Event not found.", "danger")
         return redirect(url_for('home'))
     
-    if current_user.username not in event.get('invitees', []):
+    if current_user.username not in event.get('attending', []):
         flash("You are not a participant in this event.", "danger")
         return redirect(url_for('home'))
     
@@ -263,7 +263,7 @@ def leave_event(event_id):
     
     events_collection.update_one(
         {"_id": ObjectId(event_id)},
-        {"$pull": {"invitees": current_user.username}}
+        {"$pull": {"attending": current_user.username}}
     )
     
     flash(f"You have left the event '{event_id}'.", "success")
@@ -294,8 +294,8 @@ def your_event_details(event_id):
     """
     event = db.events.find_one({"_id": ObjectId(event_id)})
 
-    if not event or event["creator"] != current_user.username:
-        flash("You are not authorized to view this event.", "danger")
+    if not event:
+        flash("Event not found.", "danger")
         return redirect(url_for('home'))
 
     # event["date_display"] = datetime.fromtimestamp(event["event_date"], tz=timezone.utc).strftime('%B %d, %Y')

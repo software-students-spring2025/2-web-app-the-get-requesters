@@ -3,6 +3,10 @@
 {% block content %}
     <a href="{{ url_for('home') }}" class="home-button">Home</a>
 
+    {% if current_user.username != event.creator %}
+        <h2>You're invited to {{event.creator}}'s event:</h2>
+    {% endif %}
+    
     <h1>{{ event.event_name }}</h1>
     <h3>{{ event.event_date }}</h3>
 
