@@ -4,12 +4,11 @@
     <a href="{{ url_for('home') }}" class="home-button">Home</a>
 
     {% if current_user.username != event.creator %}
-        <h2>You're invited to {{event.creator}}'s event:</h2>
+        <h2>You're invited to {{ event.creator }}'s event:</h2>
     {% endif %}
     
     <h1>{{ event.event_name }}</h1>
     <h3>{{ event.event_date }}</h3>
-
     <p>{{ event.description }}</p>
 
     <h2>Attendees</h2>
@@ -29,24 +28,44 @@
         {% endif %}
     </div>
 
-    <h2>{{ comments|length }} Comments</h2>
-    <div class="comments">
-        {% for comment in comments %}
-            <div class="comment">
-                <div class="profile-picture">Profile Picture</div>
-                <p>{{ comment.text }}</p>
-            </div>
-        {% endfor %}
+    <h2 style="text-align: center;">{{ comments|length }} Comments</h2>
+    <div class="comments-container" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="comment" 
+                     style="display: flex; align-items: center; gap: 10px; width: 80%; max-width: 500px; margin-bottom: 10px;">
+
+                    <div class="profile-picture" 
+                         style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px;">
+                        {{ comment.user[0]|upper }}
+                    </div>
+                    <p style="margin: 0; text-align: left; flex-grow: 1;">
+                        <strong>{{ comment.user }}</strong>: {{ comment.text }}
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center;">No comments yet. Be the first to comment!</p>
+        {% endif %}
     </div>
+
+    <h3>Add a Comment</h3>
+    <form action="{{ url_for('add_comment', event_id=event._id) }}" method="POST">
+        <input type="text" name="comment" required placeholder="Write your comment here..." style="width: 100%; padding: 10px;">
+        <button type="submit" style="margin-top: 10px; padding: 5px 15px;">Comment</button>
+    </form>
 
     {% if current_user.username == event.creator %}
         <form action="{{ url_for('edit_event', event_id=event._id) }}" method="get">
             <button type="submit" class="edit-button">Edit</button>
+        </form>
+    {% elif current_user.username in event.attending %}
+        <form action="{{ url_for('leave_event', event_id=event._id) }}" method="post">
+            <button type="submit" class="edit-button">Leave</button>
         </form>
     {% else %}
         <form action="{{ url_for('rsvp_event', event_id=event._id) }}" method="post">
             <button type="submit" class="edit-button">RSVP</button>
         </form>
     {% endif %}
-
 {% endblock %}
