@@ -20,13 +20,14 @@
                     <div class="event-item" style="margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ddd;">
                         <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.event_date }})
                         <a href="{{ url_for('your_event_details', event_id=event._id) }}" 
-                           style="color: #007bff; text-decoration: none; margin-left: 10px;">
+                           style="color: #820ae3; text-decoration: none; margin-left: 10px;">
                             📖 View Details
                         </a>
                         <form action="{{ url_for('delete_event', event_id=event._id) }}" method="post">
                             <button
                                 type="submit"
-                                style="color: red; text-decoration: none; margin-left: 10px;"
+                                class="homepage-button"
+                                style="color: red; text-decoration: none;"
                                 onclick="return confirm('Are you sure you want to delete this event?');"
                             >
                                 ❌ Delete
@@ -46,16 +47,46 @@
                     <div class="event-item" style="margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ddd;">
                         <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.event_date }})
                         <a href="{{ url_for('your_event_details', event_id=event._id) }}" 
-                           style="color: #007bff; text-decoration: none; margin-left: 10px;">
+                           style="color: #820ae3; text-decoration: none; margin-left: 10px;">
                             📖 View Details
                         </a>
                         <form action="{{ url_for('leave_event', event_id=event._id) }}" method="post">
                             <button
                                 type="submit"
-                                style="color: #007bff; text-decoration: none; margin-left: 10px;"
+                                class="homepage-button"
+                                style="color: #007bff; text-decoration: none;"
                                 onclick="return confirm('Are you sure you want to leave this event?');"
                             >
                                 🚪 Leave
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You haven't joined any events yet.</p>
+        {% endif %}
+
+
+
+        <h2>Pending Invitations</h2>
+        {% if invitations %}
+            <div class="event-list">
+                {% for event in invitations %}
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ddd;">
+                        <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.event_date }})
+                        <a href="{{ url_for('your_event_details', event_id=event._id) }}" 
+                           style="color:  #820ae3; text-decoration: none; margin-left: 10px;">
+                            📖 View Details
+                        </a>
+                        <form action="{{ url_for('rsvp_event', event_id=event._id) }}" method="post">
+                            <button
+                                type="submit"
+                                class="homepage-button"
+                                style="color: #007bff; text-decoration: none;"
+                                onclick="return confirm('Confirm?');"
+                            >
+                                RSVP
                             </button>
                         </form>
                     </div>

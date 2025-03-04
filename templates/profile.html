@@ -7,6 +7,13 @@
             <img src="/img/default_profile.png" alt="Profile">
         </a>
     <h3 style="text-align:center">About Me</h3>
-        <p class='profile_box' contenteditable="true">
-        Click to insert a short description of yourself here!</p>
+       
+    <form action="{{ url_for('update_profile') }}" method="POST" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <textarea name="about_me" class="profile_box" style="width: 90%; max-width: 400px; height: 100px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; text-align: center;">{{ about_me }}</textarea>
+
+        <button type="submit" 
+                style="margin-top: 10px; width: 90%; max-width: 400px; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Save
+        </button>
+    </form>
 {% endblock %}

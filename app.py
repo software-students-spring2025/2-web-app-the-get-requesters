@@ -105,13 +105,14 @@ def home():
     username = current_user.username
     created_events = list(events_collection.find({"creator": username}))
     joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
+    invitations = list(events_collection.find({"invitees": username, "creator": {"$ne": username}}))
 
-    for event in created_events + joined_events:
+    for event in created_events + joined_events + invitations:
         print(event)
         if isinstance(event['event_date'], datetime):
             event["event_date"] = event["event_date"].strftime('%B %d, %Y')
 
-    return render_template("home.html", created_events=created_events, joined_events=joined_events)
+    return render_template("home.html", created_events=created_events, joined_events=joined_events, invitations=invitations)
 
 @app.route('/logout')
 @login_required
@@ -137,9 +138,10 @@ def create_group():
 @login_required
 def groups():
     groups = list(groups_collection.find({'members': current_user.username}))
+
     if request.method == 'POST':
         query = request.form['query']
-        results = list(groups_collection.find({"group_name": query}))
+        results = list(groups_collection.find({"group_name": {"$regex": f"^{query}", "$options": "i"}}))
     else:
         query = ""
         results = ""
@@ -173,11 +175,26 @@ def group_details(group_name):
 @app.route('/profile')
 @login_required
 def profile():
-    username = current_user.username
-    created_groups = list(groups_collection.find({"owner": username}))
-    joined_groups = list(groups_collection.find({"members": username, "owner": {"$ne": username}}))
+    user = users_collection.find_one({"username": current_user.username})
+    about_me = user.get("about_me", "").strip()
+    if not about_me:
+        about_me = "Click to insert a short description of yourself here!"
 
-    return render_template("profile.html", created_groups=created_groups, joined_groups=joined_groups)
+    return render_template("profile.html", about_me=about_me)
+
+@app.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    if request.method == 'POST':
+        about_me = request.form['about_me']
+
+    users_collection.update_one(
+        {"username": current_user.username},
+        {"$set": {"about_me": about_me}},
+        upsert=True
+    )
+    flash("Profile updated successfully!", "success")
+    return redirect(url_for('profile'))
 
 @app.route('/create_event', methods=['GET', 'POST'])
 @login_required
@@ -259,7 +276,7 @@ def leave_event(event_id):
         flash("Event not found.", "danger")
         return redirect(url_for('home'))
     
-    if current_user.username not in event.get('invitees', []):
+    if current_user.username not in event.get('attending', []):
         flash("You are not a participant in this event.", "danger")
         return redirect(url_for('home'))
     
@@ -269,7 +286,7 @@ def leave_event(event_id):
     
     events_collection.update_one(
         {"_id": ObjectId(event_id)},
-        {"$pull": {"invitees": current_user.username}}
+        {"$pull": {"attending": current_user.username}}
     )
     
     flash(f"You have left the event '{event_id}'.", "success")
@@ -278,34 +295,13 @@ def leave_event(event_id):
 @app.route('/event/<event_id>')
 @login_required
 def your_event_details(event_id):
-    """
-    Test data
+    event = events_collection.find_one({"_id": ObjectId(event_id)})
 
-    event = {
-        "event_id": "test",
-        "owner": "lana",
-        "date": 1740897357,
-        "invitees": ["andrew", "samantha", "lana", "jack"]
-    }
-    comments = [
-        {
-            "user": "andrew",
-            "text": "nice!"
-        },
-        {
-            "user": "lana",
-            "text": "thanks!"
-        }
-    ]
-    """
-    event = db.events.find_one({"_id": ObjectId(event_id)})
-
-    if not event or event["creator"] != current_user.username:
-        flash("You are not authorized to view this event.", "danger")
+    if not event:
+        flash("Event not found.", "danger")
         return redirect(url_for('home'))
 
-    # event["date_display"] = datetime.fromtimestamp(event["event_date"], tz=timezone.utc).strftime('%B %d, %Y')
-    comments = list(db.comments.find({"event_id": event_id}))
+    comments = event.get("comments", [])
     
     return render_template("your_event_details.html", event=event, comments=comments)
 
@@ -370,6 +366,26 @@ def rsvp_event(event_id):
         flash("You have successfully RSVP'd to the event!", "success")
     
     return redirect(url_for('home'))
+
+@app.route('/add_comment/<event_id>', methods=['POST'])
+@login_required
+def add_comment(event_id):
+    comment_text = request.form.get('comment', '').strip()
+
+    if not comment_text:
+        flash("Comment cannot be empty!", "danger")
+        return redirect(url_for('your_event_details', event_id=event_id))
+
+    comment = {
+        "user": current_user.username,
+        "text": comment_text
+    }
+
+    events_collection.update_one(
+        {"_id": ObjectId(event_id)},
+        {"$push": {"comments": comment}}
+    )
+    return redirect(url_for('your_event_details', event_id=event_id))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
