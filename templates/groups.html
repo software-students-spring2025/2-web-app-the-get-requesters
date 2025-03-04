@@ -3,24 +3,54 @@
 {% block content %}
     <h1>Your Groups</h1>
     <a href="{{ url_for('home') }}">Back</a>
+
     <div class='search-bar'>
-        <form id="form"> 
-            <input type="search" id="query" name="q" placeholder="Search your groups...">
-            <button>Search</button>
+        <form id="form" method="POST" action= "{{ url_for('groups') }}"> 
+            <input type="text" id="q" name="query" placeholder="Search your groups...">
+            <button type="submit" class="search-button">Search</button>
         </form>
-        
-    </div>
-    <div class='groups-container'>
-    {% for group in groups %}
-        <div class='group-container' {% if group.owner = current_user.username %} id='group_clickable' onclick="window.location='group/{{group.group_name}}';" {% endif %}>
+        <form id="form" method="GET" action= "{{ url_for('groups') }}"> 
+            <button type="submit" class="search-button">Clear Search</button>
+        </form>
+        </br >
+        {% for group in results %}
+        <div class='group-container' {% if group.owner == current_user.username %} id='group_clickable' onclick="window.location='group/{{group.group_name}}';" {% endif %}>
             <div class="group_name">{{ group['group_name'] }}</div>
             <div><b>Owner:</b> {{group.owner}}</div>
             <span><b>Members:</b> </span>
             {% for member in group['members'] %}
                 <span class='member_name'>{{member}}</span>
             {% endfor %}
-            <br>
         </div>
-    {% endfor %}
+        {% endfor %}
+
+        <!-- no results for query -->
+       {% if results == [] %}
+           <h2>No groups found.</h2>
+       {% endif %}
+
+        <!-- no query -->
+        {% if results == "" %}
+        <div class='groups-container'>
+            {% for group in groups %}
+                <div class='group-container' {% if group.owner == current_user.username %} id='group_clickable' onclick="window.location='group/{{group.group_name}}';" {% endif %}>
+                    <div class="group_name">{{ group['group_name'] }}</div>
+                    <div><b>Owner:</b> {{group.owner}}</div>
+                    <span><b>Members:</b> </span>
+                    {% for member in group['members'] %}
+                        <span class='member_name'>{{member}}</span>
+                    {% endfor %}
+                    <br>
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+        
+
     </div>
+    <!-- original code here -->
+    
+    
+
 {% endblock %}
+
