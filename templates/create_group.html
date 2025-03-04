@@ -8,16 +8,16 @@
             <label for="group_name">Group name:</label>
             <input type="text" id="group_name" name="group_name" required>
         </div>
-        <br>
         <div class="members">
-            <label for="members">Members:</label>
-            <br>
+            <label style="font-size: 20px;" for="members">Members:</label>
             {% for member in members %}
-                <label for="{{member.username}}">{{member.username}}</label>
-                <input name="username" type="checkbox" value="{{member.username}}">
+                <div class="member_select">
+                    <input name="username" type="checkbox" value="{{member.username}}">
+                    <label class="member_name" for="{{member.username}}">{{member.username}}</label>
                 <br>
+                </div>
             {% endfor %}
         </div>
-        <input type="submit" value="Create Group" class="btn">
+        <input class="group_create" type="submit" value="Create Group" class="btn">
     </form>
 {% endblock %}

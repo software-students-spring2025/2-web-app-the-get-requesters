@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="{{ url_for('home') }}">Back</a>
+    <h4>Select members to remove from group</h4>
+    <form action="group_details" method="POST">
+        <div class="group_name">{{ group['group_name'] }}</div>
+        <input type="hidden" name="group_name" value="{{ group['group_name'] }}">
+        <div class="members">
+            <label style="font-size: 20px;" for="members">Members:</label>
+            {% for member in members %}
+                <div class="member_select">
+                    <input name="username" type="checkbox" value="{{member.username}}" {% if member.username in group.members %} checked {% endif %}>
+                    <label class="member_name" for="{{member.username}}">{{member.username}}</label>
+                </div>
+            {% endfor %}
+        </div>
+        <input name='edit_group' class="group_create" type="submit" value="Edit Members" class="btn">
+        <input name='delete_group' id="delete_group" class="group_create" type="submit" value="Delete Group" class="btn">
+    </form>
+{% endblock %}

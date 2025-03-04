@@ -125,23 +125,11 @@ def create_group():
     members = list(users_collection.find({'username': {'$ne': current_user.username}}))
     if request.method == 'POST':
         group_name = request.form['group_name']
-        members = [member.strip() for member in request.form['members'].split(',') if member.strip()]
-        members = list(set(members))
-
-        existing_group = groups_collection.find_one({"group_name": group_name})
-        if existing_group:
-            flash(f"This group already exists", "warning")
-            return redirect(url_for('create_group'))
-
-        valid_users = {user["username"] for user in users_collection.find({"username": {"$in": members}})}
-        invalid_users = set(members) - valid_users
-        members = list(valid_users)
-        if invalid_users:
-            flash(f"The following users were not found: {', '.join(invalid_users)}", "warning")
-            return redirect(url_for('create_group'))
-
-        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': list(members)})
-        return redirect(url_for('profile'))
+        if groups_collection.find_one({'group_name': group_name}):
+             flash("Group name is already taken. Please pick another", "danger")
+        members = [current_user.username] + request.form.getlist('username')
+        new_group = groups_collection.insert_one({'owner': current_user.username, 'group_name': group_name, 'members': members})
+        return redirect(url_for('groups'))
         
     return render_template("create_group.html", members=members)
 
@@ -149,8 +137,32 @@ def create_group():
 @login_required
 def groups():
     groups = list(groups_collection.find({'members': current_user.username}))
-    print(list(groups))
     return render_template("groups.html", groups=groups)
+
+@app.route('/group/<group_name>', methods=['GET', 'POST'])
+@login_required
+def group_details(group_name):
+    if request.method == 'POST':
+        if 'delete_group' in request.form:
+            groups_collection.delete_one({"group_name": request.form['group_name']})
+        elif 'edit_group' in request.form:
+            new_members = request.form.getlist('username')
+            print(request.form)
+            update_operation = { '$set' : 
+                { 'members' : new_members}
+            }
+            groups_collection.update_one({"group_name": request.form['group_name']}, update_operation)
+            
+        return redirect(url_for('groups'))
+
+    group = db.groups.find_one({"group_name": group_name})
+    all_members = users_collection.find({})
+    
+    if not group or group["owner"] != current_user.username:
+        flash("You are not authorized to view this group.", "danger")
+        return redirect(url_for('groups'))
+
+    return render_template("group_details.html", group=group, members=all_members)
 
 @app.route('/profile')
 @login_required
@@ -165,12 +177,13 @@ def profile():
 @login_required
 def create_event():
     if request.method == 'POST':
-        event_name = request.form.get("event_name")
-        event_date = request.form.get("event_date")
+        event_name = request.form['event_name']
+        if groups_collection.find_one({'event_name': event_name}):
+            ("Group name is already taken. Please pick another", "danger")
+        invitees = [current_user.username] + request.form.getlist('username')
         description = request.form.get("description")
         invitees = request.form.get("invitees").split(",")
         event_owner = current_user.username
-        print(event_date)
         try:
             date_obj = datetime.strptime(event_date,"%Y-%m-%d")
             # print(event_timestamp)
@@ -182,9 +195,28 @@ def create_event():
                 "invitees":[user.strip() for user in invitees],
                 "owner": event_owner
             })
-
             flash("Event created successfully!", "success")
             return redirect(url_for('home'))
+    
+        # event_name = request.form.get("event_name")
+        # event_date = request.form.get("event_date")
+        # description = request.form.get("description")
+        # invitees = request.form.get("invitees").split(",")
+        # event_creator = current_user.username
+        # print(event_date)
+        # try:
+        #     date_obj = datetime.strptime(event_date,"%Y-%m-%d")
+
+        #     db.events.insert_one({
+        #         "event_name": event_name,
+        #         "event_date": date_obj.strftime("%B %d, %Y"),
+        #         "description": description,
+        #         "invitees":[user.strip() for user in invitees],
+        #         "creator": event_creator
+        #     })
+
+        #     flash("Event created successfully!", "success")
+        #     return redirect(url_for('home'))
         
         except Exception as e:
             flash(f"Error: {str(e)}", "danger")
