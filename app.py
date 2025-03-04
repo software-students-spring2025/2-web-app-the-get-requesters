@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from datetime import datetime, timezone
+import re # just for search
 
 load_dotenv()
 
@@ -133,11 +134,16 @@ def create_group():
         
     return render_template("create_group.html", members=members)
 
-@app.route('/groups')
+@app.route('/groups', methods=['GET', 'POST'])
 @login_required
 def groups():
     groups = list(groups_collection.find({'members': current_user.username}))
-    return render_template("groups.html", groups=groups)
+    results = []
+    if request.method == 'POST':
+        search_term = request.form['search_term'].lower()
+        results = [group for group in groups if search_term.lower() == group.lower()]
+    return render_template("groups.html", groups=groups, results=results)
+
 
 @app.route('/group/<group_name>', methods=['GET', 'POST'])
 @login_required
@@ -342,4 +348,4 @@ def edit_event(event_id):
     return render_template("edit_event.html", event=event)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=False)
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
