@@ -133,11 +133,17 @@ def create_group():
         
     return render_template("create_group.html", members=members)
 
-@app.route('/groups')
+@app.route('/groups', methods=['GET', 'POST'])
 @login_required
 def groups():
     groups = list(groups_collection.find({'members': current_user.username}))
-    return render_template("groups.html", groups=groups)
+    if request.method == 'POST':
+        query = request.form['query']
+        results = list(groups_collection.find({"group_name": query}))
+    else:
+        query = ""
+        results = ""
+    return render_template("groups.html", groups=groups, query=query, results=results)
 
 @app.route('/group/<group_name>', methods=['GET', 'POST'])
 @login_required

@@ -6,9 +6,11 @@
         
         <div style="margin-bottom: 15px;">
             <a href="{{ url_for('logout') }}" style="margin-right: 10px;">Logout</a>
+            <a href="{{ url_for('groups') }}" style="margin-right: 10px;">My Groups</a>
             <a href="{{ url_for('profile') }}" style="margin-right: 10px;">Profile</a>
-            <a href="{{ url_for('create_event') }}" style="margin-right: 10px;">New Event</a>
-            <a href="{{ url_for('create_group') }}">New Group</a>
+            <br />
+            <a href="{{ url_for('create_event') }}" style="margin-right: 10px; margin-top: 10px;">New Event</a>
+            <a href="{{ url_for('create_group') }}" style="margin-top: 10px;">New Group</a>
         </div>
 
         <h2>Your Created Events</h2>
