@@ -15,7 +15,7 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 bcrypt = Bcrypt(app)
 
-connection = pymongo.MongoClient(os.getenv("MONGODB_URI"))
+connection = pymongo.MongoClient(os.getenv("MONGODB_URI"), tls=True, tlsAllowInvalidCertificates=True)
 db = connection[os.getenv("DB_NAME")]
 users_collection = db["users"]
 groups_collection = db["groups"]
@@ -104,8 +104,8 @@ def register():
 @login_required
 def home():
     username = current_user.username
-    created_events = list(events_collection.find({"owner": username}))
-    joined_events = list(events_collection.find({"invitees": username, "owner": {"$ne": username}}))
+    created_events = list(events_collection.find({"creator": username}))
+    joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
 
     for event in created_events + joined_events:
         print(event)
@@ -183,23 +183,23 @@ def profile():
 @login_required
 def create_event():
     if request.method == 'POST':
-        event_name = request.form['event_name']
-        if groups_collection.find_one({'event_name': event_name}):
-            ("Group name is already taken. Please pick another", "danger")
-        invitees = [current_user.username] + request.form.getlist('username')
-        description = request.form.get("description")
-        invitees = request.form.get("invitees").split(",")
-        event_owner = current_user.username
         try:
-            date_obj = datetime.strptime(event_date,"%Y-%m-%d")
-            # print(event_timestamp)
-
+            creator = current_user.username
+            event_name = request.form['event_name']
+            description = request.form.get("description")
+            event_date = request.form.get("event_date")
+            date_obj = datetime.strptime(event_date, "%Y-%m-%d")
+            invitees = [current_user.username] + request.form.getlist('username')
+            invited_groups = request.form.getlist('group_name')
+            
             db.events.insert_one({
+                "creator": creator,
                 "event_name": event_name,
-                "event_date": date_obj.strftime("%B %d, %Y"),
                 "description": description,
-                "invitees":[user.strip() for user in invitees],
-                "owner": event_owner
+                "event_date": date_obj.strftime("%B %d, %Y"),
+                "attending": [],
+                "invitees": invitees,
+                "invited_groups": invited_groups
             })
             flash("Event created successfully!", "success")
             return redirect(url_for('home'))
@@ -225,37 +225,35 @@ def create_event():
         #     return redirect(url_for('home'))
         
         except Exception as e:
-            flash(f"Error: {str(e)}", "danger")
+            flash(f"Error creating event: {str(e)}", "danger")
             return redirect(url_for('create_event'))
     
     members = list(users_collection.find({'username': {'$ne': current_user.username}}))
     groups = list(groups_collection.find())
     return render_template("create_event.html", members=members, groups=groups)
 
-@app.route('/delete_event/<event_name>', methods=['POST'])
+@app.route('/delete_event/<event_id>', methods=['POST'])
 @login_required
-def delete_event(event_name):
-    # Find the event by name
-    event = events_collection.find_one({"event_name": event_name})
+def delete_event(event_id):
+    event = db.events.find_one({"_id": ObjectId(event_id)})
     
     if not event:
         flash("Event not found.", "danger")
         return redirect(url_for('home'))
     
-    if event['owner'] != current_user.username:
+    if event['creator'] != current_user.username:
         flash("You can only delete events you created.", "danger")
         return redirect(url_for('home'))
     
-    events_collection.delete_one({"event_name": event_name})
+    events_collection.delete_one({"_id": ObjectId(event_id)})
     
-    flash(f"Event '{event_name}' has been deleted.", "success")
+    flash(f"Event '{event_id}' has been deleted.", "success")
     return redirect(url_for('home'))
 
-@app.route('/leave_event/<event_name>', methods=['POST'])
+@app.route('/leave_event/<event_id>', methods=['POST'])
 @login_required
-def leave_event(event_name):
-    # Find the event by name
-    event = events_collection.find_one({"event_name": event_name})
+def leave_event(event_id):
+    event = db.events.find_one({"_id": ObjectId(event_id)})
     
     if not event:
         flash("Event not found.", "danger")
@@ -265,22 +263,21 @@ def leave_event(event_name):
         flash("You are not a participant in this event.", "danger")
         return redirect(url_for('home'))
     
-    if event['owner'] == current_user.username:
+    if event['creator'] == current_user.username:
         flash("As the creator, you can't leave your own event. You can delete it instead.", "warning")
         return redirect(url_for('home'))
     
     events_collection.update_one(
-        {"event_name": event_name},
+        {"_id": ObjectId(event_id)},
         {"$pull": {"invitees": current_user.username}}
     )
     
-    flash(f"You have left the event '{event_name}'.", "success")
+    flash(f"You have left the event '{event_id}'.", "success")
     return redirect(url_for('home'))
 
 @app.route('/event/<event_id>')
 @login_required
 def your_event_details(event_id):
-    event_id = "test"
     """
     Test data
 
@@ -306,46 +303,73 @@ def your_event_details(event_id):
     if not event or event["creator"] != current_user.username:
         flash("You are not authorized to view this event.", "danger")
         return redirect(url_for('home'))
-    
-    from datetime import datetime
 
-    event["date_display"] = datetime.fromtimestamp(event["date"], tz=timezone.utc).strftime('%B %d, %Y')
+    # event["date_display"] = datetime.fromtimestamp(event["event_date"], tz=timezone.utc).strftime('%B %d, %Y')
     comments = list(db.comments.find({"event_id": event_id}))
     
     return render_template("your_event_details.html", event=event, comments=comments)
 
-@app.route('/edit_event/<event_id>')
+@app.route('/edit_event/<event_id>', methods=['GET', 'POST'])
 @login_required
 def edit_event(event_id):
     if request.method == 'POST':
-        event_name = request.form.get("event_name")
-        event_date = request.form.get("event_date")
-        description = request.form.get("description")
-        invitees = request.form.get("invitees").split(",")
-        event_creator = current_user.username
-
         try:
-            from datetime import datetime
-            event_timestamp = int(datetime.strptime(event_date,"%Y-%m-%d").timestamp())
-
-            # TODO: make sure this updates correctly
-            db.events.insert_one({
+            creator = current_user.username
+            event_name = request.form['event_name']
+            description = request.form.get("description")
+            event_date = request.form.get("event_date")
+            date_obj = datetime.strptime(event_date, "%Y-%m-%d")
+            invitees = [current_user.username] + request.form.getlist('username')
+            invited_groups = request.form.getlist('group_name')
+            
+            update_fields = {
+                "creator": creator,
                 "event_name": event_name,
-                "date": event_timestamp,
                 "description": description,
-                "invitees":[user.strip() for user in invitees],
-                "creator": event_creator
-            })
+                "event_date": date_obj.strftime("%B %d, %Y"),
+                "invitees": invitees,
+                "invited_groups": invited_groups
+            }
+            db.events.update_one(
+                {"_id": ObjectId(event_id)},
+                {"$set": update_fields}
+            )
 
             flash("Event updated successfully!", "success")
             return redirect(url_for('home'))
         
         except Exception as e:
-            flash(f"Error: {str(e)}", "danger")
-            return redirect(url_for('create_event'))
+            flash(f"Error creating event: {str(e)}", "danger")
+            return redirect(url_for('home'))
         
     event = db.events.find_one({"_id": ObjectId(event_id)})
-    return render_template("edit_event.html", event=event)
+    members = list(users_collection.find({'username': {'$ne': current_user.username}}))
+    groups = list(groups_collection.find())
+    return render_template("edit_event.html", event=event, members=members, groups=groups)
+
+@app.route('/rsvp/<event_id>', methods=['POST'])
+@login_required
+def rsvp_event(event_id):
+    event = events_collection.find_one({"_id": ObjectId(event_id)})
+
+    if not event:
+        flash("Event not found.", "danger")
+        return redirect(url_for('home'))
+    
+    if current_user.username in event.get("attending", []):
+        flash("You have already RSVP'd to this event.", "info")
+    else:
+        if current_user.username not in event.get("invitees", []):
+            flash("You are not invited to this event.", "danger")
+            return redirect(url_for('home'))
+        
+        events_collection.update_one(
+            {"_id": ObjectId(event_id)},
+            {"$addToSet": {"attending": current_user.username}}
+        )
+        flash("You have successfully RSVP'd to the event!", "success")
+    
+    return redirect(url_for('home'))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
