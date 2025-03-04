@@ -3,13 +3,28 @@
 {% block content %}
     <a href="{{ url_for('home') }}" class="home-button">Home</a>
 
+    {% if current_user.username != event.creator %}
+        <h2>You're invited to {{ event.creator }}'s event:</h2>
+    {% endif %}
+    
     <h1>{{ event.event_name }}</h1>
     <h3>{{ event.event_date }}</h3>
-
     <p>{{ event.description }}</p>
 
     <h2>Attendees</h2>
     <div class="attendees">
+        {% if event.attending %}
+            {% for attendee in event.attending[:4] %}
+                <div>
+                    <div class="profile-picture">Profile Picture</div>
+                    <p>{{ attendee }}</p>
+                </div>
+            {% endfor %}
+            {% if event.attending|length > 4 %}
+                <span>+{{ event.attending|length - 4 }} more</span>
+            {% endif %}
+        {% else %}
+            <p>No attendees yet.</p>
         {% if event.attending %}
             {% for attendee in event.attending[:4] %}
                 <div>
@@ -50,6 +65,7 @@
     <form action="{{ url_for('add_comment', event_id=event._id) }}" method="POST">
         <input type="text" name="comment" required placeholder="Write your comment here..." style="width: 100%; padding: 10px;">
         <button type="submit" style="margin-top: 10px; padding: 5px 15px; background-color:grey; width:40%;">Comment</button>
+
     </form>
 
     {% if current_user.username == event.creator %}
@@ -57,13 +73,12 @@
             <button type="submit" class="edit-button">Edit</button>
         </form>
     {% elif current_user.username in event.attending %}
-    <form action="{{ url_for('leave_event', event_id=event._id) }}" method="post">
-        <button type="submit" class="edit-button">Leave</button>
-    </form>
+        <form action="{{ url_for('leave_event', event_id=event._id) }}" method="post">
+            <button type="submit" class="edit-button">Leave</button>
+        </form>
     {% else %}
         <form action="{{ url_for('rsvp_event', event_id=event._id) }}" method="post">
             <button type="submit" class="edit-button">RSVP</button>
         </form>
     {% endif %}
-
 {% endblock %}

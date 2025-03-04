@@ -182,12 +182,13 @@ def profile():
 
     return render_template("profile.html", about_me=about_me)
 
+
 @app.route('/update_profile', methods=['POST'])
 @login_required
 def update_profile():
     if request.method == 'POST':
         about_me = request.form['about_me']
-
+    
     users_collection.update_one(
         {"username": current_user.username},
         {"$set": {"about_me": about_me}},
@@ -302,7 +303,7 @@ def your_event_details(event_id):
         return redirect(url_for('home'))
 
     comments = event.get("comments", [])
-    
+
     return render_template("your_event_details.html", event=event, comments=comments)
 
 @app.route('/edit_event/<event_id>', methods=['GET', 'POST'])
@@ -386,6 +387,7 @@ def add_comment(event_id):
         {"$push": {"comments": comment}}
     )
     return redirect(url_for('your_event_details', event_id=event_id))
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=os.environ.get('PORT', 5001), debug=True)
