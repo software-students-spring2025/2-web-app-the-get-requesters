@@ -138,9 +138,10 @@ def create_group():
 @login_required
 def groups():
     groups = list(groups_collection.find({'members': current_user.username}))
+
     if request.method == 'POST':
         query = request.form['query']
-        results = list(groups_collection.find({"group_name": query}))
+        results = list(groups_collection.find({"group_name": {"$regex": f"^{query}", "$options": "i"}}))
     else:
         query = ""
         results = ""

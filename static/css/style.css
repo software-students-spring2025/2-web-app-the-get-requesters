@@ -10,7 +10,7 @@ body {
 color: white;
 margin: 1vw;
 font-family: "Verdana", "Helvetica Neue", Helvetica, Arial, sans-serif;
-background-image: linear-gradient(#c57ff7 , #8888fe);
+background-image: linear-gradient(#d98cfa , #b991fd, #8888fe);
 background-attachment: fixed;
 background-color: #ab69db;
 text-align: center; /* may have to change */
@@ -35,6 +35,7 @@ top: 30vh; left: 50vw;
 a {
 /* display: block; */
 margin: 1vh auto;
+color:#820ae3;
 }
 
 /* start of profile button */
@@ -96,7 +97,7 @@ margin: auto;
 }
 
 input, textarea {
-width: 100%;
+width: 95%;
 padding: 12px;
 margin: 10px 0;
 border-radius: 10px;
@@ -111,15 +112,15 @@ height: 80px;
 resize: none;
 }
 
-button {
+button, .group-create {
 width: 105%;
 padding: 12px;
-background: #E0AEE3;
+background: #f6b6f9;
 border: none;
 border-radius: 10px;
 font-size: 18px;
 font-weight: bold;
-color: black;
+color: white;
 cursor: pointer;
 margin-top: 15px;
 text-align: center;
@@ -127,6 +128,11 @@ text-align: center;
 
 button:hover {
 background: #D49AD5;
+}
+
+.homepage-button {
+  width: 50%;
+  margin-left: 0px;
 }
 
 /* Event Details Page */
@@ -193,7 +199,7 @@ display: block;
 width: 200px;
 padding: 15px;
 margin: 20px auto;
-background: #E0AEE3;
+/* background: #E0AEE3; */
 text-align: center;
 font-size: 18px;
 font-weight: bold;
@@ -280,7 +286,6 @@ background-color: darkred;
   display: block;
   width: 200px;
   margin: 20px auto;
-  background: #E0AEE3;
   text-align: center;
   font-size: 18px;
   font-weight: bold;
