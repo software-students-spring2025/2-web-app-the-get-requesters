@@ -14,14 +14,18 @@
 
     <h2>Attendees</h2>
     <div class="attendees">
-        {% for attendee in event.attending[:4] %}
-            <div>
-                <div class="profile-picture">Profile Picture</div>
-                <p>{{ attendee }}</p>
-            </div>
-        {% endfor %}
-        {% if event.attending|length > 4 %}
-            <span>+{{ event.attending|length - 4 }} more</span>
+        {% if event.attending %}
+            {% for attendee in event.attending[:4] %}
+                <div>
+                    <div class="profile-picture">Profile Picture</div>
+                    <p>{{ attendee }}</p>
+                </div>
+            {% endfor %}
+            {% if event.attending|length > 4 %}
+                <span>+{{ event.attending|length - 4 }} more</span>
+            {% endif %}
+        {% else %}
+            <p>No attendees yet.</p>
         {% endif %}
     </div>
 

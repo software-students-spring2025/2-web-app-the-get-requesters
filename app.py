@@ -105,13 +105,14 @@ def home():
     username = current_user.username
     created_events = list(events_collection.find({"creator": username}))
     joined_events = list(events_collection.find({"attending": username, "creator": {"$ne": username}}))
+    invitations = list(events_collection.find({"invitees": username, "creator": {"$ne": username}}))
 
-    for event in created_events + joined_events:
+    for event in created_events + joined_events + invitations:
         print(event)
         if isinstance(event['event_date'], datetime):
             event["event_date"] = event["event_date"].strftime('%B %d, %Y')
 
-    return render_template("home.html", created_events=created_events, joined_events=joined_events)
+    return render_template("home.html", created_events=created_events, joined_events=joined_events, invitations=invitations)
 
 @app.route('/logout')
 @login_required

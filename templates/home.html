@@ -64,5 +64,32 @@
         {% else %}
             <p>You haven't joined any events yet.</p>
         {% endif %}
+
+        
+        <h2>Pending Invitations</h2>
+        {% if invitations %}
+            <div class="event-list">
+                {% for event in invitations %}
+                    <div class="event-item" style="margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #ddd;">
+                        <strong>{{ event.event_name }}</strong> - {{ event.description }} (Date: {{ event.event_date }})
+                        <a href="{{ url_for('your_event_details', event_id=event._id) }}" 
+                           style="color: #007bff; text-decoration: none; margin-left: 10px;">
+                            📖 View Details
+                        </a>
+                        <form action="{{ url_for('rsvp_event', event_id=event._id) }}" method="post">
+                            <button
+                                type="submit"
+                                style="color: #007bff; text-decoration: none; margin-left: 10px;"
+                                onclick="return confirm('Confirm?');"
+                            >
+                                RSVP
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You haven't joined any events yet.</p>
+        {% endif %}
     </div>
 {% endblock %}
